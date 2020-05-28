@@ -27,6 +27,8 @@ void removeEdge(Vertex** grid, int ix);
 void Print(Vertex **grid, int ix);
 void Path(Vertex **grid, int ix);
 Vertex* findVertex(Vertex **grid, char in, int ix);
+void dijkstra(Vertex ** vgrid, int grid[22][22], Vertex* start, Vertex* end, int ix);
+int minDistance(int dist[], bool visited[]);
 
 int main() {
   //Initialize variables
@@ -205,7 +207,6 @@ Vertex* findVertex(Vertex **grid, char input, int ix) {
 //Print out adjacency table
 void Print(Vertex **grid, int ix) {
   //Create empty display array
-  //[col][row]
   char display[22][22]; 
   for (int i = 0; i < 22; i++) {
     for (int j = 0; j < 22; j++) {
@@ -248,7 +249,100 @@ void Print(Vertex **grid, int ix) {
   }
 }
 
-//Find the shortest path using Dijkstra's Algorithm
+//Find the two vertices that have a path between and pass them onto the algorithm
 void Path(Vertex **grid, int ix) {
+  char in1, in2;
+  cout << "Enter first vertex" << endl;
+  cin >> in1;
+  cin.ignore();
+  cout << "Enter second vertex" << endl;
+  cin >> in2;
+  cin.ignore();
+  //Return the vertices with the appropriate labels
+  Vertex* start = findVertex(grid, in1, ix);
+  Vertex* end = findVertex(grid, in2, ix);
+  if (start == NULL || end == NULL) {
+    cout << "Invalid vertices!" << endl;
+  }
+  else { 
+    //Create adjacency matrix with weights instead of T and F
+    int display[22][22];
+    for (int i = 0; i < 22; i++) {
+      for (int j = 0; j < 22; j++) {
+	display[i][j] = 0;
+      }
+    }
+    for (int i = 0; i < ix; i++) {
+      Vertex* a = grid[i];
+      for (int j = 0; j < ix; j++) {
+	Vertex* b = grid[j];
+	//If an edge exists
+	if (a->edge[b->index] != 0) {
+	  display[i][j] = a->edge[b->index];
+	}
+	else {
+	  display[i][j] = 0;
+	}
+      }
+    }
+    //Pass parameters onto the algorithm
+    dijkstra(grid, display, start, end, ix);
+  }
+}
+
+
+//Find the shortest path with Dijkstras algorithm
+//Functions partially from edpresso tutorial
+//www.educative.io/edpresso/how-to-implement-dijkstras-algorithm-in-cpp
+void dijkstra(Vertex** vgrid, int grid[22][22], Vertex* start, Vertex* end, int ix) {
+  int dist[22];
+  bool visited[22];
+  int cost = 0;
+  //Set nodes with infinity distance and mark them as visited 
+  for (int i = 0; i < 22; i++) {
+    dist[i] = INT_MAX;
+    bool visited = false;
+  }
+  //Set initial distance to 0
+  dist[0] = 0;
+  for (int i = 0; i < 22; i++) {
+    int m = minDistance(dist, visited);
+    visited[m] = true;
+    for (int j = 0; j < 22; j++) {
+      //Update min distance for the node
+      if ((!visited[j] && grid[m][j] && dist[m] != INT_MAX)
+	  && (dist[m] + grid[m][j] < dist[j])) {
+	    dist[j] = dist[m] + grid[m][j];
+	    //Add weights to cost
+	    cost += grid[m][j];
+	    //If the destination node is reached
+	    if (vgrid[j] == end) {
+	      //Stop the loop
+	      j = 22;
+	      i = 22;
+	    }
+      }
+      else {
+	cout << "There is no path!" << endl;
+	i = 22;
+	j = 22;
+      }
+    }
+  }
+  //Print out total
+  cout << "Total: " << cost << endl;
   
+}
+
+//Return min distance for the vertex not included in visisted array
+int minDistance(int dist[], bool visited[]) {
+  int min = INT_MAX,index;
+  for (int i = 0; i < 22; i++) {
+    //If node is unvisited and the weight is less than or equal to infinity
+    if (visited[i] == false && dist[i] <= min) {
+      min = dist[i];
+      index = i;
+    }
+  }
+  return index;
 }
